@@ -82,20 +82,16 @@ except FileNotFoundError:
     # === GESTION DES FICHIERS INEXISTANTS ===
     # Gère le cas où le fichier de tâches n'existe pas encore
     if options.command == 'add':
-        # Regarde si il y a une option label
-        if options.labels:
-            labels = options.labels
-        else:
-            labels = None
         # Permet d'ajouter la première tâche dans un nouveau fichier
-        commands.add(' '.join(options.details), options.file, tasks, labels)
+        labels = options.labels if hasattr(options, 'labels') and options.labels else None
+        commands.add(' '.join(options.details), options.file, [], labels)
     elif options.command == 'addLabel':
         # Impossible d'ajouter une étiquette dans un fichier inexistant
         print(f"Error: The file {options.file} was not found")
     elif options.command == 'modify':
         # Impossible de modifier dans un fichier inexistant
         print(f"Error: The file {options.file} was not found")
-    elif options.command == 'rm' or options.command == 'rmLabel' or options.command == 'clearLabel':
+    elif options.command in ['rm', 'rmLabel', 'clearLabel']:
         # Impossible de supprimer dans un fichier inexistant
         print(f"Error: The file {options.file} was not found")
     elif options.command == 'show':

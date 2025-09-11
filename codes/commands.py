@@ -115,11 +115,11 @@ def rm(task_id, filename, tasks):
 
 def addLabel(task_id, new_labels, filename, tasks):
     """
-    Commande CLI pour ajouter une étiquette à une tâche existante.
+    Commande CLI pour ajouter une ou plusieurs étiquettes à une tâche existante.
     
     Args:
         task_id (str): ID de la tâche à modifier
-        new_labels (list[str]): Etiquette(s) à ajouter à la tâche
+        new_labels (str): Étiquette(s) à ajouter à la tâche (séparées par des espaces)
         filename (str): Chemin vers le fichier de tâches
         tasks (list): Liste des lignes existantes du fichier
         
@@ -129,14 +129,20 @@ def addLabel(task_id, new_labels, filename, tasks):
         
     Note:
         Le fichier est entièrement réécrit pour maintenir la cohérence.
+        Les doublons d'étiquettes sont automatiquement évités.
         
     Example:
-        >>> addLabel("1", "Etiquette", "tasks.txt", ["1;Ancienne;None"])
-        Labels added.
+        >>> addLabel("1", "urgent important", "tasks.txt", ["1;Ancienne;None"])
+        Labels added successfully.
     """
+    # Convertit la chaîne d'étiquettes en liste si c'est une chaîne
+    if isinstance(new_labels, str):
+        labels_list = new_labels.split()
+    else:
+        labels_list = new_labels if new_labels else []
 
     # Utilise la logique métier pour modifier la tâche
-    found, updated_tasks = core.addLabel(tasks, task_id, new_labels)
+    found, updated_tasks = core.addLabel(tasks, task_id, labels_list)
     
     if found:
         # Réécrit tout le fichier avec les tâches mises à jour
@@ -145,7 +151,7 @@ def addLabel(task_id, new_labels, filename, tasks):
                 # Gestion des étiquettes
                 labels_str = ",".join(lab) if lab else "None"
                 f.write(f"{tid};{desc};{labels_str}\n")
-        print(f"Labels added.")
+        print(f"Labels added successfully.")
     else:
         # Message d'erreur si la tâche n'existe pas
         print(f"Error: task id {task_id} not found.")
@@ -181,7 +187,7 @@ def rmLabel(task_id, filename, tasks):
                 # Gestion des étiquettes
                 labels_str = ",".join(lab) if lab else "None"
                 f.write(f"{tid};{desc};{labels_str}\n")
-        print(f"Label deleted.")
+        print(f"Label removed successfully.")
     else:
         # Message d'erreur si la tâche n'existe pas
         print(f"Error: task id {task_id} not found.")
@@ -217,7 +223,7 @@ def clearLabel(task_id, filename, tasks):
                 # Gestion des étiquettes
                 labels_str = ",".join(lab) if lab else "None"
                 f.write(f"{tid};{desc};{labels_str}\n")
-        print(f"Labels deleted.")
+        print(f"All labels removed successfully.")
     else:
         # Message d'erreur si la tâche n'existe pas
         print(f"Error: task id {task_id} not found.")

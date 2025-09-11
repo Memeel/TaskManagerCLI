@@ -1,8 +1,15 @@
 """
+Core module for task management.
+
 Ce module contient la logique métier principale pour la gestion des tâches.
 Il fournit les fonctions de base pour créer, modifier, supprimer et afficher des tâches.
 
-Format des tâches: Chaque tâche est stockée sous forme "ID;Description" dans le fichier.
+Format des tâches: Chaque tâche est stockée sous forme "ID;Description;étiquette1,étiquette2" 
+ou "ID;Description;None" (pour les tâches sans étiquettes) dans le fichier.
+
+Rétrocompatibilité: Supporte aussi l'ancien format "ID;Description" (sans étiquettes).
+
+Auteurs: Groupe 4 - Codecamp
 """
 
 
@@ -29,12 +36,17 @@ def parse_tasks(tasks):
     for line in tasks:
         line = line.strip()
         if line:  # Ignore les lignes vides
-            parts = line.split(";", 2)
-            if len(parts) == 3:
+            parts = line.split(";")
+            if len(parts) >= 2:  # Au minimum ID et description
                 try:
                     tid = int(parts[0])
-                    labels = [] if parts[2] == "None" else parts[2].split(",")
-                    parsed_tasks.append((tid, parts[1], labels))
+                    description = parts[1]
+                    # Gestion des étiquettes (rétrocompatibilité)
+                    if len(parts) >= 3 and parts[2] != "None":
+                        labels = [label.strip() for label in parts[2].split(",") if label.strip()]
+                    else:
+                        labels = []
+                    parsed_tasks.append((tid, description, labels))
                 except ValueError:
                     # Ignore les lignes avec un ID non numérique
                     continue
@@ -213,8 +225,9 @@ def addLabel(tasks, task_id, labels):
             # Initialisation de la liste des étiquettes
             new_lab = [] if lab is None else lab[:]
             for label in labels:
-                new_lab.append(label)
-            # Modification de la tâche en supprimant les doublons des étiquettes (s'il y en a)
+                if label not in new_lab:  # Éviter les doublons
+                    new_lab.append(label)
+            # Modification de la tâche avec les nouvelles étiquettes
             parsed_tasks[i] = (tid, desc, new_lab)
             found = True
             break
@@ -266,9 +279,20 @@ def rmLabel(tasks, task_id):
                 print("Étiquettes de la tâche :")
                 for j, label in enumerate(lab):
                     print(f"{j}: {label}")
-                n = int(input("Entrez le numéro de l'étiquette à supprimer : "))
-                while n < 0 or n > len(lab)-1:
-                    n = int(input("Le numéro n'est pas valide, entrez le numéro de l'étiquette à supprimer : "))
+                
+                # Validation robuste de l'entrée utilisateur
+                while True:
+                    try:
+                        n = int(input("Entrez le numéro de l'étiquette à supprimer : "))
+                        if 0 <= n < len(lab):
+                            break
+                        else:
+                            print(f"Le numéro doit être entre 0 et {len(lab)-1}")
+                    except ValueError:
+                        print("Erreur : veuillez entrer un nombre valide")
+                    except KeyboardInterrupt:
+                        print("\nOpération annulée")
+                        return False, parsed_tasks
             
                 # Suppression de l'étiquette
                 lab.pop(n)

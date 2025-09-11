@@ -98,16 +98,17 @@ def create_parser():
     # === Commande ADDLABEL ===
     parser_addLabel = subparsers.add_parser(
         'addLabel',
-        help='Ajouter une étiquette',
-        description='Ajoute une étiquette à une tâche existante, la tâche peut avoir d\'autres étiquettes'
+        help='Ajouter des étiquettes',
+        description='Ajoute une ou plusieurs étiquettes à une tâche existante (évite automatiquement les doublons)'
     )
     parser_addLabel.add_argument(
         'id',
-        help="ID numérique de la tâche dont on souhaite ajouter une étiquette"
+        help="ID numérique de la tâche dont on souhaite ajouter des étiquettes"
     )
     parser_addLabel.add_argument(
         'labels',
-        help="Etiquette à ajouter à la tâche"
+        nargs='+',
+        help="Étiquette(s) à ajouter à la tâche (séparées par des espaces)"
     )
 
     # === Commande RMLABEL ===
