@@ -286,7 +286,7 @@ def rmLabel(tasks, task_id):
     # Recherche et modification de la tâche correspondante
     for i, (tid, desc, lab) in enumerate(parsed_tasks):
         if tid == task_id:
-            old_task = (tid, desc, lab)
+            old_task = (tid, desc, lab[:])
             if lab:
                 print("Étiquettes de la tâche :")
                 for j, label in enumerate(lab):
