@@ -37,6 +37,8 @@ def add(details, filename, tasks, labels = None):
     """
     # Utilise la logique métier pour créer la nouvelle tâche
     task_id, description, labels_list, task_line = core.add(tasks, details, labels)
+    with open("history.txt", "a") as h:
+        h.write(f"[this task was add as {get_current_datetime()}] id: {task_id} | desc: {description} | labels: {labels_list}\n")
     
     # Ajoute la tâche au fichier (mode append)
     with open(filename, 'a') as f:
