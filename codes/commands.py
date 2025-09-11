@@ -9,6 +9,12 @@ Chaque fonction correspond à une commande CLI et gère:
 """
 
 import core
+from datetime import datetime
+
+def get_current_datetime():
+    """Retourne la date et l'heure actuelle sous forme de chaîne."""
+    now = datetime.now()
+    return now.strftime("%Y-%m-%d %H:%M:%S")
 
 
 def add(details, filename, tasks, labels = None):
@@ -64,7 +70,7 @@ def modify(task_id, new_details, filename, tasks):
         Task 1 modified.
     """
     # Utilise la logique métier pour modifier la tâche
-    found, updated_tasks = core.modify(tasks, task_id, new_details)
+    found, updated_tasks, old_task = core.modify(tasks, task_id, new_details)
     
     if found:
         # Réécrit tout le fichier avec les tâches mises à jour
@@ -74,6 +80,13 @@ def modify(task_id, new_details, filename, tasks):
                 labels_str = ",".join(lab) if lab else "None"
                 f.write(f"{tid};{desc};{labels_str}\n")
         print(f"Task {task_id} modified.")
+
+        # Enregistre les modifications dans l'historique
+        with open("historique.txt", 'a') as h:
+            tid, desc, lab = old_task
+            labels_str = ",".join(lab) if lab else "None" 
+            h.write(f"[The description of this task was modified on {get_current_datetime()}] {tid};{desc};{labels_str}\n")
+
     else:
         # Message d'erreur si la tâche n'existe pas
         print(f"Error: task id {task_id} not found.")
@@ -99,7 +112,7 @@ def rm(task_id, filename, tasks):
         Task 1 removed.
     """
     # Utilise la logique métier pour supprimer la tâche
-    found, remaining_tasks = core.rm(tasks, task_id)
+    found, remaining_tasks, old_task = core.rm(tasks, task_id)
     
     if found:
         # Réécrit le fichier avec les tâches restantes
@@ -109,6 +122,12 @@ def rm(task_id, filename, tasks):
                 labels_str = ",".join(lab) if lab else "None"
                 f.write(f"{tid};{desc};{labels_str}\n")
         print(f"Task {task_id} removed.")
+
+        with open("historique.txt", 'a') as h:
+            tid, desc, lab = old_task
+            labels_str = ",".join(lab) if lab else "None" 
+            h.write(f"[This task was removed on {get_current_datetime()}] {tid};{desc};{labels_str}\n")
+
     else:
         # Message d'erreur si la tâche n'existe pas
         print(f"Error: task id {task_id} not found.")
@@ -142,7 +161,7 @@ def addLabel(task_id, new_labels, filename, tasks):
         labels_list = new_labels if new_labels else []
 
     # Utilise la logique métier pour modifier la tâche
-    found, updated_tasks = core.addLabel(tasks, task_id, labels_list)
+    found, updated_tasks, old_task = core.addLabel(tasks, task_id, labels_list)
     
     if found:
         # Réécrit tout le fichier avec les tâches mises à jour
@@ -152,6 +171,12 @@ def addLabel(task_id, new_labels, filename, tasks):
                 labels_str = ",".join(lab) if lab else "None"
                 f.write(f"{tid};{desc};{labels_str}\n")
         print(f"Labels added successfully.")
+
+        with open("historique.txt", 'a') as h:
+            tid, desc, lab = old_task
+            labels_str = ",".join(lab) if lab else "None" 
+            h.write(f"[A label was added to this task on {get_current_datetime()}] {tid};{desc};{labels_str}\n")
+
     else:
         # Message d'erreur si la tâche n'existe pas
         print(f"Error: task id {task_id} not found.")
@@ -178,7 +203,7 @@ def rmLabel(task_id, filename, tasks):
     """
 
     # Utilise la logique métier pour modifier la tâche
-    found, updated_tasks = core.rmLabel(tasks, task_id)
+    found, updated_tasks, old_task = core.rmLabel(tasks, task_id)
     
     if found:
         # Réécrit tout le fichier avec les tâches mises à jour
@@ -188,6 +213,12 @@ def rmLabel(task_id, filename, tasks):
                 labels_str = ",".join(lab) if lab else "None"
                 f.write(f"{tid};{desc};{labels_str}\n")
         print(f"Label removed successfully.")
+
+        with open("historique.txt", 'a') as h:
+            tid, desc, lab = old_task
+            labels_str = ",".join(lab) if lab else "None" 
+            h.write(f"[A label was removed from this task on {get_current_datetime()}] {tid};{desc};{labels_str}\n")
+
     else:
         # Message d'erreur si la tâche n'existe pas
         print(f"Error: task id {task_id} not found.")
@@ -214,7 +245,7 @@ def clearLabel(task_id, filename, tasks):
     """
     
     # Utilise la logique métier pour modifier la tâche
-    found, updated_tasks = core.clearLabel(tasks, task_id)
+    found, updated_tasks, old_task = core.clearLabel(tasks, task_id)
     
     if found:
         # Réécrit tout le fichier avec les tâches mises à jour
@@ -224,6 +255,12 @@ def clearLabel(task_id, filename, tasks):
                 labels_str = ",".join(lab) if lab else "None"
                 f.write(f"{tid};{desc};{labels_str}\n")
         print(f"All labels removed successfully.")
+
+        with open("historique.txt", 'a') as h:
+            tid, desc, lab = old_task
+            labels_str = ",".join(lab) if lab else "None" 
+            h.write(f"[All labels of this task were removed on {get_current_datetime()}] {tid};{desc};{labels_str}\n")
+
     else:
         # Message d'erreur si la tâche n'existe pas
         print(f"Error: task id {task_id} not found.")

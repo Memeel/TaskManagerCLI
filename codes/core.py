@@ -111,10 +111,10 @@ def modify(tasks, task_id, new_details):
         new_details (str): Nouvelle description pour la tâche
         
     Returns:
-        tuple: (found: bool, updated_tasks: list)
+        tuple: (found: bool, updated_tasks: list, old_task: tuple)
             - found: True si la tâche a été trouvée et modifiée, False sinon
             - updated_tasks: Liste des tâches mis à jour
-            
+            - old_task: Tuple (id, desc, lab) correspondant à l'ancienne tâche
     Note:
         - L'ID peut être fourni comme string ou int, il sera converti
         - Si l'ID n'est pas numérique, retourne (False, [])
@@ -138,11 +138,12 @@ def modify(tasks, task_id, new_details):
     # Recherche et modification de la tâche correspondante
     for i, (tid, desc, lab) in enumerate(parsed_tasks):
         if tid == task_id:
+            old_task = (tid, desc, lab)
             parsed_tasks[i] = (tid, new_details, lab)
             found = True
             break
     
-    return found, parsed_tasks
+    return found, parsed_tasks, old_task
     
 def rm(tasks, task_id):
     """
@@ -153,9 +154,10 @@ def rm(tasks, task_id):
         task_id (str|int): ID de la tâche à supprimer
         
     Returns:
-        tuple: (found: bool, remaining_tasks: list)
+        tuple: (found: bool, remaining_tasks: list, old_task: tuple)
             - found: True si la tâche a été trouvée et supprimée, False sinon
             - remaining_tasks: Liste des tâches restantes
+            - old_task: Tuple (id, desc, lab) correspondant à l'ancienne tâche
             
     Note:
         - L'ID peut être fourni comme string ou int, il sera converti
@@ -178,11 +180,18 @@ def rm(tasks, task_id):
     original_length = len(parsed_tasks)
     
     # Filtre les tâches pour enlever celle avec l'ID spécifié
-    filtered_tasks = [(tid, desc, lab) for tid, desc, lab in parsed_tasks if tid != task_id]
+    for (tid, desc, lab) in parsed_tasks:  
+        filtered_tasks = []
+        if tid != task_id:
+            filtered_tasks.append((tid, desc, lab))
+        else:
+            old_task = (tid, desc, lab)
     
     # Détermine si une tâche a été supprimée
     found = len(filtered_tasks) < original_length
-    return found, filtered_tasks
+    if not found:
+        old_task = None
+    return found, filtered_tasks, old_task
             
 def addLabel(tasks, task_id, labels):
     """
@@ -194,9 +203,10 @@ def addLabel(tasks, task_id, labels):
         labels (list[str]): Liste d'étiquette(s) à ajouter
 
     Returns:
-        tuple: (found: bool, updated_tasks: list)
+        tuple: (found: bool, updated_tasks: list, old_task: tuple)
             - found: True si la tâche a été trouvée et modifiée, False sinon
             - updated_tasks: Liste des tuples (id: int, description: str, labels: list[str]) représentant toutes les tâches
+            - old_task: Tuple (id, desc, lab) correspondant à l'ancienne tâche
 
     Note:
         - L'ID peut être fourni comme string ou int, il sera converti
@@ -222,6 +232,7 @@ def addLabel(tasks, task_id, labels):
     # Recherche et modification de la tâche correspondante
     for i, (tid, desc, lab) in enumerate(parsed_tasks):
         if tid == task_id:
+            old_task = (tid, desc, lab)
             # Initialisation de la liste des étiquettes
             new_lab = [] if lab is None else lab[:]
             for label in labels:
@@ -232,7 +243,7 @@ def addLabel(tasks, task_id, labels):
             found = True
             break
     
-    return found, parsed_tasks
+    return found, parsed_tasks, old_task
 
 
 
@@ -245,10 +256,10 @@ def rmLabel(tasks, task_id):
         task_id (str|int): ID de la tâche à modifier
 
     Returns:
-        tuple: (found: bool, updated_tasks: list)
+        tuple: (found: bool, updated_tasks: list, old_task: tuple)
             - found: True si la tâche a été trouvée et modifiée, False sinon
             - updated_tasks: Liste des tuples (id: int, description: str, labels: list[str]) représentant toutes les tâches 
-            
+            - old_task: Tuple (id, desc, lab) correspondant à l'ancienne tâche
     Note:
         - L'ID peut être fourni comme string ou int, il sera converti
         - Si l'ID n'est pas numérique, retourne (False, tâches_originales)
@@ -275,6 +286,7 @@ def rmLabel(tasks, task_id):
     # Recherche et modification de la tâche correspondante
     for i, (tid, desc, lab) in enumerate(parsed_tasks):
         if tid == task_id:
+            old_task = (tid, desc, lab)
             if lab:
                 print("Étiquettes de la tâche :")
                 for j, label in enumerate(lab):
@@ -302,7 +314,7 @@ def rmLabel(tasks, task_id):
             found = True
             break
     
-    return found, parsed_tasks
+    return found, parsed_tasks, old_task
 
 
 def clearLabel(tasks, task_id):
@@ -314,10 +326,11 @@ def clearLabel(tasks, task_id):
         task_id (str|int): ID de la tâche à modifier
 
     Returns:
-        tuple: (found: bool, updated_tasks: list)
+        tuple: (found: bool, updated_tasks: list, old_task: tuple)
             - found: True si la tâche a été trouvée et modifiée, False sinon
             - updated_tasks: Liste des tuples (id: int, description: str, labels: list[str]) représentant toutes les tâches
-            
+            - old_task: Tuple (id, desc, lab) correspondant à l'ancienne tâche
+
     Note:
         - L'ID peut être fourni comme string ou int, il sera converti
         - Si l'ID n'est pas numérique, retourne (False, tâches_originales)
@@ -341,11 +354,12 @@ def clearLabel(tasks, task_id):
     # Recherche et modification de la tâche correspondante
     for i, (tid, desc, lab) in enumerate(parsed_tasks):
         if tid == task_id:
+            old_task = (tid, desc, lab)
             parsed_tasks[i] = (tid, desc, [])
             found = True
             break
     
-    return found, parsed_tasks
+    return found, parsed_tasks, old_task
 
 def show(tasks):
     """
