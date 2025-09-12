@@ -41,12 +41,13 @@ def parse_tasks(tasks):
                 try:
                     tid = int(parts[0])
                     description = parts[1]
+                    etat = parts[3]
                     # Gestion des étiquettes (rétrocompatibilité)
-                    if len(parts) >= 3 and parts[2] != "None":
+                    if len(parts) >= 4 and parts[2] != "None":
                         labels = [label.strip() for label in parts[2].split(",") if label.strip()]
                     else:
                         labels = []
-                    parsed_tasks.append((tid, description, labels))
+                    parsed_tasks.append((tid, description, labels, etat))
                 except ValueError:
                     # Ignore les lignes avec un ID non numérique
                     continue
@@ -79,6 +80,7 @@ def add(tasks, details, labels = None):
         (2, 'Nouvelle tâche', ['étiquette'], '2;Nouvelle tâche;étiquette\n')
     """
     # Trouve le prochain ID disponible en analysant les tâches existantes
+    status = "Suspended"
     parsed_tasks = parse_tasks(tasks)
     if parsed_tasks:
         # Calcule l'ID maximum et ajoute 1
@@ -97,7 +99,7 @@ def add(tasks, details, labels = None):
     labels_str = ",".join(labels_list) if labels_list else "None"
 
     # Formate la ligne pour l'écriture dans le fichier
-    new_task_line = f"{new_id};{details};{labels_str}\n"
+    new_task_line = f"{new_id};{details};{labels_str};{status}\n"
     return (new_id, details, labels_list, new_task_line)
 
 
@@ -398,24 +400,28 @@ def show(tasks):
     sorted_tasks = sorted(parsed_tasks, key=lambda x: x[0])
     
     # Calcule la largeur optimale pour la colonne description
-    max_desc_length = max(len(desc) for _, desc, _ in sorted_tasks) if sorted_tasks else 10
+    max_desc_length = max(len(desc) for _, desc, _, _ in sorted_tasks) if sorted_tasks else 10
     max_desc_length = max(max_desc_length, 11)  # Largeur minimale pour "description"
     
     # Calcule la largeur optimale pour la colonne étiquette(s)
-    max_lab_length = max(len(", ".join(lab)) for _, _, lab in sorted_tasks) if sorted_tasks else 11
+    max_lab_length = max(len(", ".join(lab)) for _, _, lab, _ in sorted_tasks) if sorted_tasks else 11
     max_lab_length = max(max_lab_length, 12)  # Largeur minimale pour "étiquette(s)"
 
+    # Calcule la largeur optimale pour la colonne état
+    max_etat_length = max(len(", ".join(etat)) for _, _, _, etat in sorted_tasks) if sorted_tasks else 11
+    max_etat_length = max(max_etat_length, 12)  # Largeur minimale pour "étiquette(s)"
+
     # Construction et affichage du tableau
-    border_line = f"+-----+{'-' * (max_desc_length + 2)}+{'-' * (max_lab_length + 2)}+"
-    header_line = f"| {'id':<3} | {'description':<{max_desc_length}} | {'étiquette(s)':<{max_lab_length}} |"
+    border_line = f"+-----+{'-' * (max_desc_length + 2)}+{'-' * (max_lab_length + 2)}+{'-' * (max_etat_length + 2)}+"
+    header_line = f"| {'id':<3} | {'description':<{max_desc_length}} | {'étiquette(s)':<{max_lab_length}} | {'État(s)':<{max_etat_length}} |"
     
     print(border_line)
     print(header_line)
     print(border_line)
     
     # Affichage de chaque tâche
-    for task_id, description, labels in sorted_tasks:
+    for task_id, description, labels, etat in sorted_tasks:
         labels_str = ", ".join(labels) if labels else "None"
-        print(f"| {task_id:<3} | {description:<{max_desc_length}} | {labels_str:{max_lab_length}} |")
+        print(f"| {task_id:<3} | {description:<{max_desc_length}} | {labels_str:{max_lab_length}} | {etat:{max_etat_length}} |")
     
     print(border_line)
