@@ -66,6 +66,10 @@ def create_parser():
         nargs='*',
         help='Etiquettes optionnelles pour la tâche'
     )
+    parser_add.add_argument(
+        '--statut',
+        help='Statut de la tâche : started, suspended, completed ,cancelled(par défaut suspended) '
+    )
     
     # === Commande MODIFY ===
     parser_modify = subparsers.add_parser(
@@ -94,7 +98,16 @@ def create_parser():
         'id', 
         help="ID numérique de la tâche à supprimer"
     )
-
+    # === Commande modifyStatus ===
+    parser_updateStatus = subparsers.add_parser(
+        'updateStatus',
+        help='Ajouter des étiquettes',
+        description='modifier le statut pour une tâche existante '
+    )
+    parser_updateStatus.add_argument(
+        'id',
+        help="ID numérique de la tâche dont on souhaite modifier le statut"
+    )
     # === Commande ADDLABEL ===
     parser_addLabel = subparsers.add_parser(
         'addLabel',

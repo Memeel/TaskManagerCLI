@@ -12,7 +12,6 @@ Rétrocompatibilité: Supporte aussi l'ancien format "ID;Description" (sans éti
 Auteurs: Groupe 4 - Codecamp
 """
 
-
 def parse_tasks(tasks):
     """
     Parse les lignes brutes du fichier en une liste structurée de tâches.
@@ -53,52 +52,30 @@ def parse_tasks(tasks):
     return parsed_tasks
 
 
-def add(tasks, details, labels = None):
+def add(tasks, details, labels=None, statut="suspended"):
     """
     Ajoute une nouvelle tâche avec un ID auto-incrémenté.
-    
-    Args:
-        tasks (list): Liste des lignes existantes du fichier de tâches
-        details (str): Description de la nouvelle tâche
-        labels (list[str], optional): Liste d'étiquette(s) de la nouvelle tâche, None si aucune 
-        
-    Returns:
-        tuple: (new_id: int, description: str, label: list, task_line: str)
-            - new_id: L'ID assigné à la nouvelle tâche
-            - description: La description de la tâche
-            - label: Liste des étiquettes, vide si aucune
-            - task_line: La ligne formatée à écrire dans le fichier
-            
-    Note:
-        - L'ID est calculé comme max(IDs existants) + 1
-        - Si aucune tâche n'existe, l'ID commence à 1
-        - La ligne retournée inclut le saut de ligne final
-        
-    Example:
-        >>> add(["1;Tâche existante;None"], "Nouvelle tâche", ["étiquette"])
-        (2, 'Nouvelle tâche', ['étiquette'], '2;Nouvelle tâche;étiquette\n')
     """
-    # Trouve le prochain ID disponible en analysant les tâches existantes
+
+    # Détermination du prochain ID
     parsed_tasks = parse_tasks(tasks)
     if parsed_tasks:
-        # Calcule l'ID maximum et ajoute 1
-        max_id = max(task[0] for task in parsed_tasks)
-        new_id = max_id + 1
+        new_id = max(task[0] for task in parsed_tasks) + 1
     else:
-        # Premier ID si aucune tâche n'existe
         new_id = 1
 
-    # Réécriture de labels
-    if labels == None:
-        labels_list = []
-    else:
-        labels_list = labels
-    
+    # Vérification du statut
+    if statut not in ["started", "suspended", "completed", "cancelled"]:
+        print(f"Statut '{statut}' invalide, utilisation de 'suspended à la place.")
+    print(f"statut nouvelle gtache",statut)
+    # Gestion des labels
+    labels_list = labels if labels is not None else []
     labels_str = ",".join(labels_list) if labels_list else "None"
 
-    # Formate la ligne pour l'écriture dans le fichier
-    new_task_line = f"{new_id};{details};{labels_str}\n"
+    # Ligne formatée
+    new_task_line = f"{new_id};{details};{labels_str};{statut}\n"
     return (new_id, details, labels_list, new_task_line)
+
 
 
 def modify(tasks, task_id, new_details):
@@ -192,7 +169,33 @@ def rm(tasks, task_id):
     if not found:
         old_task = None
     return found, filtered_tasks, old_task
-            
+    def modifyStatus(tasks, task_id, labels): 
+      try:
+        task_id = int(task_id)
+      except ValueError:
+        # ID invalide (non numérique)
+        return False, []
+        
+    # Parse les tâches existantes
+        parsed_tasks = parse_tasks(tasks)
+        found = False   
+def update_task_status(tasks, task_id, new_status):
+    """
+    Met à jour le statut d'une tâche existante.
+    """
+    if new_status not in VALID_STATUS:
+        print(f"Statut '{new_status}' invalide. Choisir parmi {VALID_STATUS}.")
+        return
+    parsed_tasks = parse_tasks(tasks)
+    
+    # Recherche et modification de la tâche correspondante
+    for i, (tid, desc, lab , statut) in enumerate(parsed_tasks):
+        if tid == task_id:
+            old_status = statut
+            parsed_tasks[i] = (tid, desc, lab,new_status)
+            print(f"Tâche {task_id}: statut changé de '{old_status}' à '{new_status}'")       
+            return parsed_tasks
+    print(f"Tâche avec ID {task_id} introuvable.")
 def addLabel(tasks, task_id, labels):
     """
     Ajoute une ou plusieurs étiquette(s) à une tâche existante.

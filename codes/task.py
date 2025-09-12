@@ -31,6 +31,7 @@ from options import create_parser
 # === ANALYSE DES ARGUMENTS ===
 # Création et utilisation du parseur de ligne de commande
 options = create_parser().parse_args()
+print(options)
 
 try:
     # === LECTURE DU FICHIER DE TÂCHES ===
@@ -77,6 +78,8 @@ try:
     elif options.command == 'show':
         # Affiche toutes les tâches
         commands.show(tasks)
+    if options.command == "updateStatus":
+        commands.update_task_status(tasks, options.id,options.file,options.statut)
         
 except FileNotFoundError:
     # === GESTION DES FICHIERS INEXISTANTS ===

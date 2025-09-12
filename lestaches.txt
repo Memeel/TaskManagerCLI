@@ -1,2 +1,4 @@
 1;hello;work
 2;hello;None
+3;vendre de l'aviande;None;suspended
+4;vendre de l'aviande;None;suspended
