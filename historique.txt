@@ -22,3 +22,7 @@
 [This task has been added at 2025-09-12 11:23:06] 5;test;None;suspended
 [This task has been added at 2025-09-12 11:24:34] 6;test;None;None
 [This task has been added at 2025-09-12 11:25:45] 7;test;None;started
+[This task has been added at 2025-09-12 11:32:32] 8;test;None;cancelled
+[This task has been added at 2025-09-12 11:32:41] 9;test;None;suspended
+[This task has been added at 2025-09-12 11:32:45] 10;test;None;completed
+[This task has been added at 2025-09-12 11:33:36] 11;test;None;None

@@ -5,3 +5,7 @@
 5;test;None;suspended
 6;test;None;None
 7;test;None;started
+8;test;None;cancelled
+9;test;None;suspended
+10;test;None;completed
+11;test;None;None
