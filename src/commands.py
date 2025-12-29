@@ -33,7 +33,14 @@ def add(details, filename, tasks, labels = None, status = "suspended"):
     """
 
     # Utilise la logique métier pour créer la nouvelle tâche
-    task_id, description, labels_list, task_line = core.add(tasks, details, labels, status)
+    result = core.add(tasks, details, labels, status)
+    
+    # Si l'utilisateur a annulé (Ctrl+C), on arrête tout pour éviter le crash
+    if result[0] is None:
+        return
+
+    task_id, description, labels_list, task_line = result
+
     with open("historique.txt", "a") as h:
         h.write(f"[This task was added at {get_current_datetime()}] {task_line}")
     

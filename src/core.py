@@ -30,6 +30,7 @@ def parse_tasks(tasks):
         >>> parse_tasks(["1;Faire les courses;None", "2;Réviser;Urgent"])
         [(1, 'Faire les courses', []), (2, 'Réviser', ['Urgent'])]
     """
+    
     parsed_tasks = []
     for line in tasks:
         line = line.strip()
@@ -61,6 +62,7 @@ def parse_tasks(tasks):
                 except ValueError:
                     # Ignore les lignes avec un ID non numérique
                     continue
+
     return parsed_tasks
 
 
@@ -89,6 +91,7 @@ def add(tasks, details, labels = None, status="suspended"):
         >>> add(["1;Tâche existante;None"], "Nouvelle tâche", ["étiquette"])
         (2, 'Nouvelle tâche', ['étiquette'], '2;Nouvelle tâche;étiquette\n')
     """
+
     # Trouve le prochain ID disponible en analysant les tâches existantes
     parsed_tasks = parse_tasks(tasks)
     if parsed_tasks:
@@ -108,9 +111,9 @@ def add(tasks, details, labels = None, status="suspended"):
     
     # Vérification du statut
     if status not in ["started", "suspended", "completed", "cancelled"]:
-        print(f"Statut '{status}' invalide, utilisation de 'suspended à la place.")
+        print(f"Statut '{status}' invalide, utilisation de 'suspended' à la place.")
         status = "suspended"
-    print(f"Statut de la nouvelle tache : {status}")
+    print(f"Statut de la nouvelle tâche : {status}")
 
     if parsed_tasks:
         dependence = input("Cette tâche dépend t-elle d'une autre tâche ? O/N : ")
@@ -134,7 +137,7 @@ def add(tasks, details, labels = None, status="suspended"):
                     print("Erreur : veuillez entrer un nombre valide")
                 except KeyboardInterrupt:
                     print("\nOpération annulée")
-                    return False, parsed_tasks
+                    return None, None, None, None
         else:
             id_dep = None
     else:
@@ -174,7 +177,7 @@ def modify(tasks, task_id, new_details = None, new_status = None):
         task_id = int(task_id)
     except ValueError:
         # ID invalide (non numérique)
-        return False, []
+        return False, [], None
         
     # Parse les tâches existantes
     parsed_tasks = parse_tasks(tasks)
@@ -222,12 +225,13 @@ def rm(tasks, task_id):
         >>> rm(["1;Tâche 1;None", "2;Tâche 2;None"], "1")
         (True, [(2, 'Tâche 2', [])])
     """
+
     # Validation et conversion de l'ID
     try:
         task_id = int(task_id)
     except ValueError:
         # ID invalide, retourne les tâches non modifiées
-        return False, parse_tasks(tasks)
+        return False, parse_tasks(tasks), None
         
     # Parse les tâches existantes
     parsed_tasks = parse_tasks(tasks)
@@ -245,6 +249,7 @@ def rm(tasks, task_id):
     found = len(filtered_tasks) < original_length
     if not found:
         old_task = None
+
     return found, filtered_tasks, old_task
             
 def add_options(tasks, task_id, labels=None, id_dep=None):
@@ -260,6 +265,7 @@ def add_options(tasks, task_id, labels=None, id_dep=None):
     Returns:
         tuple: (found: bool, updated_tasks: list, old_task: tuple)
     """
+
     # Validation et conversion de l'ID
     try:
         task_id = int(task_id)
@@ -332,7 +338,7 @@ def rmLabel(tasks, task_id):
         task_id = int(task_id)
     except ValueError:
         # ID invalide (non numérique)
-        return False, []
+        return False, [], None
         
     # Parse les tâches existantes
     parsed_tasks = parse_tasks(tasks)
@@ -359,7 +365,7 @@ def rmLabel(tasks, task_id):
                         print("Erreur : veuillez entrer un nombre valide")
                     except KeyboardInterrupt:
                         print("\nOpération annulée")
-                        return False, parsed_tasks
+                        return False, parsed_tasks, None
             
                 # Suppression de l'étiquette
                 lab.pop(n)
@@ -400,7 +406,7 @@ def clearLabel(tasks, task_id):
         task_id = int(task_id)
     except ValueError:
         # ID invalide (non numérique)
-        return False, []
+        return False, [], None
         
     # Parse les tâches existantes
     parsed_tasks = parse_tasks(tasks)
@@ -417,12 +423,34 @@ def clearLabel(tasks, task_id):
     return found, parsed_tasks, old_task
 
 def rmDep(tasks, task_id):
+    """
+    Supprime la dépendance associée à une tâche en utilisant son ID.
+
+    Args:
+        tasks (list): Liste des lignes existantes du fichier de tâches
+        task_id (str|int): ID de la tâche à modifier
+
+    Returns:
+        tuple: (found: bool, updated_tasks: list, old_task: tuple)
+            - found: True si la tâche a été trouvée et modifiée, False sinon
+            - updated_tasks: Liste des tuples (id: int, description: str, labels: list[str], status: str, dep) représentant toutes les tâches
+            - old_task: Tuple (id, desc, lab, status, dep) correspondant à l'ancienne tâche avant suppression de la dépendance
+
+    Note:
+        - L'ID peut être fourni comme string ou int, il sera converti
+        - Si l'ID n'est pas numérique, retourne (False, [])
+        
+    Example:
+        >>> rmDep(["1;Tâche 1;None", "2;Tâche 2;Etiquette1"], "2")
+        (True, [(1, 'Tâche 1', [], 'suspended', None), (2, 'Tâche 2', ['Etiquette1'], 'suspended', None)], (2, 'Tâche 2', ['Etiquette1'], 'suspended', '1'))
+    """
+
     # Validation et conversion de l'ID
     try:
         task_id = int(task_id)
     except ValueError:
         # ID invalide (non numérique)
-        return False, []
+        return False, [], None
         
     # Parse les tâches existantes
     parsed_tasks = parse_tasks(tasks)
@@ -465,6 +493,7 @@ def show(tasks):
         | 2   | Seconde tâche | None                   |
         +-----+---------------+------------------------+
     """
+
     # Parse et vérifie s'il y a des tâches
     parsed_tasks = parse_tasks(tasks)
     if not parsed_tasks:
