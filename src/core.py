@@ -115,33 +115,44 @@ def add(tasks, details, labels = None, status="suspended"):
         status = "suspended"
     print(f"Statut de la nouvelle tâche : {status}")
 
+    # Gestion des dépendances
+    id_dep = None
     if parsed_tasks:
-        dependence = input("Cette tâche dépend t-elle d'une autre tâche ? O/N : ")
-        dependence_list = ["o", "n", "oui", "non"]
-        while dependence.lower() not in dependence_list:
-            dependence = input("Input invalide, cette tâche dépend t-elle d'une autre tâche ? O/N : ")
+        try:
+            dependence = input("Cette tâche dépend t-elle d'une autre tâche ? O/N : ")
+            while dependence.lower() not in ["o", "n", "oui", "non"]:
+                dependence = input("Input invalide, cette tâche dépend t-elle d'une autre tâche ? O/N : ")
 
-        if dependence.lower() in ["oui", "o"]:
-            id_list = []
-            for (tid, desc, _, _, _) in parsed_tasks:
-                print(f"{tid}: {desc}")
-                id_list.append(tid)
-            while True:
-                try:
-                    id_dep = int(input("Laquelle ? "))
-                    if id_dep in id_list:
-                        break
-                    else:
-                        print(f"Cette tâche n'existe pas, entrez un identifiant valide")
-                except ValueError:
-                    print("Erreur : veuillez entrer un nombre valide")
-                except KeyboardInterrupt:
-                    print("\nOpération annulée")
-                    return None, None, None, None
-        else:
-            id_dep = None
-    else:
-        id_dep = None
+            if dependence.lower() in ["oui", "o"]:
+                print("Liste des tâches existantes :")
+                id_list = []
+                for (tid, desc, _, state, _) in parsed_tasks:
+                    print(f"{tid}: {desc} ({state})")
+                    id_list.append(tid)
+
+                while True:
+                    try:
+                        id_dep = int(input("Laquelle ? "))
+                        if id_dep in id_list:
+                            if status == "started" or status == "completed":
+                                # On cherche le statut de la tâche dépendante
+                                parent_status = "suspended"
+                                for (pid, _, _, pstate, _) in parsed_tasks:
+                                    if pid == id_dep:
+                                        parent_status = pstate
+                                        break
+                            
+                                if parent_status != "completed":
+                                    print(f"La tâche dépendante n'est pas complétée (statut actuel : {parent_status}). La nouvelle tâche sera mise en 'suspended'.")
+                                    status = "suspended"
+                            break
+                        else:
+                            print(f"Cette tâche n'existe pas, entrez un identifiant valide")
+                    except ValueError:
+                        print("Erreur : veuillez entrer un nombre valide")
+        except KeyboardInterrupt:
+            print("\nOpération annulée")
+            return None, None, None, None
 
     # Formate la ligne pour l'écriture dans le fichier
     new_task_line = f"{new_id};{details};{labels_str};{status};{id_dep}\n"
@@ -188,11 +199,30 @@ def modify(tasks, task_id, new_details = None, new_status = None):
     for i, (tid, desc, lab, state, dep) in enumerate(parsed_tasks):
             if tid == task_id:
                 old_task = (tid, desc, lab, state, dep)
+                
+                # Mise à jour du statut si fourni
                 if new_status is not None:
                     if new_status not in ["started", "suspended", "completed", "cancelled"]:
                         print(f"Statut '{new_status}' invalide, pas de modification du statut")
+                elif (new_status == "started" or new_status == "completed") and dep is not None:
+                    # On cherche le statut de la tâche dépendante
+                    parent_completed = False
+                    parent_found = False
+
+                    for (pid, _, _, pstate, _) in parsed_tasks:
+                        if pid == dep:
+                            parent_found = True
+                            if pstate == "completed":
+                                parent_completed = True
+                            break
+                    
+                    if parent_found and not parent_completed:
+                        print(f"La tâche dépendante (ID {dep}) n'est pas complétée. Le statut ne peut pas être mis à jour.")
                     else:
                         state = new_status
+
+                else:
+                    state = new_status
 
                 if new_details is not None:
                     desc = new_details
