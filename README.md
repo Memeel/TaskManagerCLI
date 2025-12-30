@@ -40,7 +40,7 @@ Le projet est organisé en plusieurs modules pour une meilleure séparation des 
 ## Installation et Utilisation
 
 ### Prérequis
-- Python 3.6 ou supérieur
+- Python 3.10 ou supérieur
 - Aucune dépendance externe (utilise uniquement la bibliothèque standard Python)
 
 ### Utilisation
