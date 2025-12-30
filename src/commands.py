@@ -189,7 +189,7 @@ def add_options(task_id, filename, tasks, new_labels = None, id_dep = None):
                 labels_str = ",".join(lab) if lab else "None"
                 dep = dep if dep else "None"
                 f.write(f"{tid};{desc};{labels_str};{state};{dep}\n")
-        print(f"Labels added successfully.")
+        print(f"Options added successfully.")
 
         with open("historique.txt", 'a') as h:
             tid, desc, lab, state, dep = old_task
