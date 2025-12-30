@@ -85,12 +85,15 @@ python src/task.py <fichier_taches> <commande> [arguments]
 
 4. **Ajouter une option (Etiquette ou Dépendance)**
    ```bash
-   python src/task.py lestaches.txt add_options <id> -l <étiquette(s) à ajouter>
+   python src/task.py lestaches.txt add_options <id> [-l <étiquette(s)>] [-d <id_dépendance>]
    ```
    Exemple :
    ```bash
+   # Ajouter une étiquette
    python src/task.py lestaches.txt add_options 1 -l "urgent"
-   # Le script permet aussi de gérer les dépendances via cette commande.
+
+   # Ajouter une dépendance (la tâche 2 dépendra de la tâche 1)
+   python src/task.py lestaches.txt add_options 2 -d 1
    ```
 
 5. **Supprimer une étiquette**
